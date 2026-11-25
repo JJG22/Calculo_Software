@@ -1,5 +1,6 @@
 node_modules
 dist
+build-server
 *.log
 .DS_Store
 .vite

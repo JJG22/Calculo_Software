@@ -1,18 +1,22 @@
 import { useEffect, useState } from 'react'
 import { useHashRoute, useHistory, type Route } from './lib/hooks'
 import DuelView from './views/DuelView'
+import JoinView from './views/JoinView'
 import ModelView from './views/ModelView'
 import ScoreboardView from './views/ScoreboardView'
 
-const NAV: { id: Route; num: string; label: string }[] = [
+const NAV: { id: Exclude<Route, 'unirse'>; num: string; label: string }[] = [
   { id: 'modelo', num: '01', label: 'Modelo' },
   { id: 'duelo', num: '02', label: 'Duelo' },
   { id: 'marcador', num: '03', label: 'Marcador' },
 ]
 
 export default function App() {
-  const [route, go] = useHashRoute()
+  const [route, go, param] = useHashRoute()
   const store = useHistory()
+
+  // Celular del jugador: vista propia, sin el menú del stand
+  if (route === 'unirse') return <JoinView codeFromUrl={param} />
 
   return (
     <div className="grid-bg flex min-h-screen flex-col">

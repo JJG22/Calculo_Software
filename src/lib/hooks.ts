@@ -3,19 +3,25 @@ import type { RoundRecord } from './scoring'
 
 /* ---------------- Rutas por hash (#/modelo, #/duelo, #/marcador) ---------------- */
 
-export type Route = 'modelo' | 'duelo' | 'marcador'
-const ROUTES: Route[] = ['modelo', 'duelo', 'marcador']
+export type Route = 'modelo' | 'duelo' | 'marcador' | 'unirse'
+const ROUTES: Route[] = ['modelo', 'duelo', 'marcador', 'unirse']
 
-function parseHash(): Route {
-  const h = window.location.hash.replace(/^#\/?/, '')
-  return (ROUTES as string[]).includes(h) ? (h as Route) : 'modelo'
+interface ParsedHash {
+  route: Route
+  /** Segundo segmento, p. ej. el código de sala en #/unirse/ABCD */
+  param: string
 }
 
-export function useHashRoute(): [Route, (r: Route) => void] {
-  const [route, setRoute] = useState<Route>(parseHash)
+function parseHash(): ParsedHash {
+  const [head = '', param = ''] = window.location.hash.replace(/^#\/?/, '').split('/')
+  return (ROUTES as string[]).includes(head) ? { route: head as Route, param } : { route: 'modelo', param: '' }
+}
+
+export function useHashRoute(): [Route, (r: Route) => void, string] {
+  const [parsed, setParsed] = useState<ParsedHash>(parseHash)
   useEffect(() => {
     const onChange = () => {
-      setRoute(parseHash())
+      setParsed(parseHash())
       window.scrollTo({ top: 0 })
     }
     window.addEventListener('hashchange', onChange)
@@ -24,7 +30,7 @@ export function useHashRoute(): [Route, (r: Route) => void] {
   const go = useCallback((r: Route) => {
     window.location.hash = `/${r}`
   }, [])
-  return [route, go]
+  return [parsed.route, go, parsed.param]
 }
 
 /* ---------------- Historial de rondas persistido en localStorage ---------------- */
@@ -60,7 +66,11 @@ export function useHistory(): HistoryStore {
     }
   }, [history])
 
-  const add = useCallback((r: RoundRecord) => setHistory((h) => [...h, r]), [])
+  // Ignora duplicados: en línea, el mismo resultado puede llegar otra vez tras una reconexión
+  const add = useCallback(
+    (r: RoundRecord) => setHistory((h) => (h.some((x) => x.id === r.id) ? h : [...h, r])),
+    [],
+  )
   const removeLast = useCallback(() => setHistory((h) => h.slice(0, -1)), [])
   const clear = useCallback(() => setHistory([]), [])
 

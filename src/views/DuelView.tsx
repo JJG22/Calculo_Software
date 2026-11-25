@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Keypad, isValidEntry } from '../components/Keypad'
 import { FormulaG } from '../components/MathText'
+import { HostRoom } from '../components/online/HostRoom'
 import { RoundReveal } from '../components/RoundReveal'
 import { Button, PLAYER_COLORS, Tag } from '../components/ui'
 import { mmss, usd } from '../lib/format'
@@ -21,6 +22,9 @@ import { isMuted, setMuted, sfx } from '../lib/sound'
 
 type Phase = 'setup' | 'handoff' | 'entry' | 'reveal'
 type Mode = 'clasico' | 'experto'
+type Variant = 'local' | 'online'
+
+const VARIANT_KEY = 'planta-iot-duelo/variante'
 
 interface Props {
   active: boolean
@@ -44,6 +48,13 @@ export default function DuelView({ active, onRecord, onScoreboard }: Props) {
   const [record, setRecord] = useState<RoundRecord | null>(null)
   const [startedAt, setStartedAt] = useState<number | null>(null)
   const [muted, setMutedState] = useState(isMuted)
+  const [variant, setVariant] = useState<Variant>(() => {
+    try {
+      return localStorage.getItem(VARIANT_KEY) === 'online' ? 'online' : 'local'
+    } catch {
+      return 'local'
+    }
+  })
 
   const players = names.map((n) => n.trim())
   const keys = players.map(playerKey)
@@ -98,6 +109,22 @@ export default function DuelView({ active, onRecord, onScoreboard }: Props) {
     setNames((prev) => Array.from({ length: n }, (_, i) => prev[i] ?? ''))
   }
 
+  function chooseVariant(v: Variant) {
+    if (v === variant) return
+    if (variant === 'local' && (phase === 'handoff' || phase === 'entry')) {
+      if (!window.confirm('Hay una ronda en curso en este dispositivo. ¿Cambiar de modo y cancelarla?')) return
+      setEntries([])
+      setValue('')
+      setPhase('setup')
+    }
+    setVariant(v)
+    try {
+      localStorage.setItem(VARIANT_KEY, v)
+    } catch {
+      /* ignorar */
+    }
+  }
+
   const toggleMute = () => {
     setMuted(!muted)
     setMutedState(!muted)
@@ -113,8 +140,28 @@ export default function DuelView({ active, onRecord, onScoreboard }: Props) {
           <div className="font-mono text-xs uppercase tracking-[0.2em] text-hazard">Duelo competitivo</div>
           <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Gerentes de Planta en Crisis</h1>
         </div>
-        <div className="flex items-center gap-2">
-          {startedAt !== null && phase !== 'setup' && <RoundTimer startedAt={startedAt} />}
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex rounded-lg border border-ink-600 p-0.5" role="group" aria-label="Forma de jugar">
+            {(
+              [
+                ['local', '🖥 Un dispositivo'],
+                ['online', '📱 En línea (celulares)'],
+              ] as const
+            ).map(([v, label]) => (
+              <button
+                key={v}
+                type="button"
+                onClick={() => chooseVariant(v)}
+                aria-pressed={variant === v}
+                className={`cursor-pointer rounded-md px-3 py-1.5 text-xs font-semibold transition ${
+                  variant === v ? 'bg-hazard text-ink-950' : 'text-ink-300 hover:text-ink-100'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          {variant === 'local' && startedAt !== null && phase !== 'setup' && <RoundTimer startedAt={startedAt} />}
           <button
             type="button"
             onClick={toggleMute}
@@ -123,7 +170,7 @@ export default function DuelView({ active, onRecord, onScoreboard }: Props) {
           >
             {muted ? '🔇 Sonido' : '🔊 Sonido'}
           </button>
-          {(phase === 'handoff' || phase === 'entry') && (
+          {variant === 'local' && (phase === 'handoff' || phase === 'entry') && (
             <button
               type="button"
               onClick={cancelRound}
@@ -135,7 +182,9 @@ export default function DuelView({ active, onRecord, onScoreboard }: Props) {
         </div>
       </div>
 
-      {phase === 'setup' && (
+      {variant === 'online' && <HostRoom onRecord={onRecord} onScoreboard={onScoreboard} />}
+
+      {variant === 'local' && phase === 'setup' && (
         <div className="grid gap-5 lg:grid-cols-[1.3fr_1fr]">
           <section className="panel animate-rise p-6">
             <h2 className="text-xl font-bold">1 · ¿Quiénes compiten?</h2>
@@ -240,7 +289,7 @@ export default function DuelView({ active, onRecord, onScoreboard }: Props) {
         </div>
       )}
 
-      {phase === 'handoff' && (
+      {variant === 'local' && phase === 'handoff' && (
         <section className="panel grid min-h-[460px] animate-rise place-items-center p-8 text-center">
           <div>
             <Progress players={players} done={entries.length} />
@@ -258,7 +307,7 @@ export default function DuelView({ active, onRecord, onScoreboard }: Props) {
         </section>
       )}
 
-      {phase === 'entry' && (
+      {variant === 'local' && phase === 'entry' && (
         <section className="grid animate-rise gap-5 lg:grid-cols-[1fr_420px]">
           <div className="panel flex flex-col justify-between gap-6 p-6">
             <div>
@@ -295,14 +344,14 @@ export default function DuelView({ active, onRecord, onScoreboard }: Props) {
               setValue={setValue}
               onSubmit={confirmEntry}
               max={MAX_MAINTENANCES}
-              active={active && phase === 'entry'}
+              active={active && variant === 'local' && phase === 'entry'}
               accent={color}
             />
           </div>
         </section>
       )}
 
-      {phase === 'reveal' && record && (
+      {variant === 'local' && phase === 'reveal' && record && (
         <RoundReveal
           record={record}
           scenario={scenario}

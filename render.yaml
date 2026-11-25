@@ -1,15 +1,13 @@
-# Blueprint de Render: sitio estático (React + Vite).
+# Blueprint de Render: servicio web Node (sirve la app React y las salas en línea por WebSocket).
 # En Render: New > Blueprint > conecta el repositorio. Render detecta este archivo.
 services:
   - type: web
     name: planta-iot-duelo
-    runtime: static
-    buildCommand: npm install && npm run build
-    staticPublishPath: ./dist
+    runtime: node
+    plan: free
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /healthz
     envVars:
       - key: NODE_VERSION
         value: 22.12.0
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html

@@ -3,10 +3,11 @@ import { Chart } from './Chart'
 import { Eq, Frac, FormulaG } from './MathText'
 import { Button, PLAYER_COLORS } from './ui'
 import { easeOutCubic, useProgress } from '../lib/hooks'
-import { num, qty, signed, usd } from '../lib/format'
+import { num, qty, usd } from '../lib/format'
 import { type Scenario, G, criticalRhs, toUSD } from '../lib/model'
-import { BONUS_POINTS, BONUS_TOLERANCE, WIN_POINTS, type PlayerResult, type RoundRecord } from '../lib/scoring'
+import { BONUS_POINTS, WIN_POINTS, type RoundRecord } from '../lib/scoring'
 import { sfx } from '../lib/sound'
+import { verdict } from '../lib/verdict'
 
 interface Props {
   record: RoundRecord
@@ -17,28 +18,6 @@ interface Props {
 }
 
 const REVEAL_MS = 2800
-
-function verdict(p: PlayerResult, xOpt: number) {
-  if (Math.abs(p.x - xOpt) <= BONUS_TOLERANCE) {
-    return {
-      title: 'Zona óptima',
-      cls: 'text-ok',
-      text: `G′(${qty(p.x)}) = ${signed(p.slope, 2)} ≈ 0: estás en el fondo del valle.`,
-    }
-  }
-  if (p.slope < 0) {
-    return {
-      title: 'Te quedaste corto',
-      cls: 'text-sensor',
-      text: `G′(${qty(p.x)}) = ${signed(p.slope, 2)} < 0: el gasto todavía bajaba. Más mantenimientos te habrían ahorrado dinero.`,
-    }
-  }
-  return {
-    title: 'Te pasaste',
-    cls: 'text-alarm',
-    text: `G′(${qty(p.x)}) = ${signed(p.slope, 2)} > 0: cada mantenimiento extra ya aumentaba el gasto.`,
-  }
-}
 
 export function RoundReveal({ record, scenario: s, onRematch, onNewPlayers, onScoreboard }: Props) {
   const p = useProgress(REVEAL_MS, record.id)
