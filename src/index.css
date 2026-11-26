@@ -9,9 +9,10 @@
   --color-ink-800: #131920;
   --color-ink-700: #1d252e;
   --color-ink-600: #2b3642;
-  --color-ink-500: #4a5765;
-  --color-ink-400: #6f7d8b;
-  --color-ink-300: #9ba8b5;
+  /* Grises de texto calibrados para proyector: ink-500 ≥ 4.5:1 e ink-400 ≈ 7:1 sobre ink-950 */
+  --color-ink-500: #6d7a88;
+  --color-ink-400: #8e9aa8;
+  --color-ink-300: #aab5c1;
   --color-ink-200: #c5ced7;
   --color-ink-100: #e6ebf0;
 
@@ -55,6 +56,21 @@
 
 html {
   color-scheme: dark;
+}
+
+/* Superficies del navegador con la paleta de la planta */
+::selection {
+  background: rgb(255 176 32 / 0.35);
+  color: var(--color-ink-100);
+}
+input,
+textarea {
+  caret-color: var(--color-hazard);
+}
+:focus-visible {
+  outline: 2px solid var(--color-hazard);
+  outline-offset: 2px;
+  border-radius: 6px;
 }
 
 body {

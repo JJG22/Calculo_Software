@@ -29,7 +29,7 @@ export default function App() {
               <div className="text-sm font-bold tracking-[0.12em]">
                 PLANTA<span className="text-hazard">·</span>IoT
               </div>
-              <div className="font-mono text-[11px] text-ink-400">Mantenimiento predictivo</div>
+              <div className="font-mono text-xs text-ink-400">Mantenimiento predictivo</div>
             </div>
           </a>
 
@@ -46,7 +46,7 @@ export default function App() {
                     activeTab ? 'bg-hazard text-ink-950' : 'text-ink-300 hover:bg-ink-800 hover:text-ink-100'
                   }`}
                 >
-                  <span className={`mr-1.5 font-mono text-[11px] ${activeTab ? 'text-ink-950/70' : 'text-ink-500'}`}>
+                  <span className={`mr-1.5 font-mono text-xs ${activeTab ? 'text-ink-950/70' : 'text-ink-400'}`}>
                     {n.num}
                   </span>
                   {n.label}
@@ -76,7 +76,7 @@ export default function App() {
         </div>
       </main>
 
-      <footer className="border-t border-ink-800 px-4 py-6 text-center font-mono text-xs text-ink-500">
+      <footer className="border-t border-ink-800 px-4 py-6 text-center text-sm text-ink-400">
         Proyecto 5 · Aplicación de la derivada · Mantenimiento predictivo con sensores IoT
         <br />
         Miguel Caro · Jhon Jairo García · Diego Núñez

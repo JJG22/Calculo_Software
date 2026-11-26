@@ -115,7 +115,7 @@ export function RoundReveal({ record, scenario: s, onRematch, onNewPlayers, onSc
                 {done && (
                   <div className="animate-pop text-right">
                     <div className="font-mono text-3xl font-bold text-hazard">+{pl.points}</div>
-                    <div className="text-[11px] uppercase tracking-wider text-ink-400">puntos</div>
+                    <div className="text-xs uppercase tracking-wider text-ink-400">puntos</div>
                   </div>
                 )}
               </header>
@@ -157,7 +157,7 @@ export function RoundReveal({ record, scenario: s, onRematch, onNewPlayers, onSc
                   )}
                   <div className={`font-bold ${v.cls}`}>{v.title}</div>
                   <div className="text-ink-300">{v.text}</div>
-                  <div className="mt-2 flex flex-wrap gap-1.5 font-mono text-[11px]">
+                  <div className="mt-2 flex flex-wrap gap-1.5 font-mono text-xs">
                     {solo && (
                       <span className="rounded bg-hazard/15 px-2 py-0.5 text-hazard">
                         {tier.emoji} {tier.label} +{tier.points}

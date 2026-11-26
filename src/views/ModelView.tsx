@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react'
 import { Chart } from '../components/Chart'
 import { Eq, Frac, FormulaG } from '../components/MathText'
-import { SectionTitle, Stat, Tag } from '../components/ui'
+import { Button, SectionTitle, Stat, Tag } from '../components/ui'
 import { num, signed, usd } from '../lib/format'
 import {
   BASE_SCENARIO as S,
@@ -25,6 +25,7 @@ export default function ModelView() {
   const gOpt = G(xOpt)
   const [x, setX] = useState(2)
   const [showParts, setShowParts] = useState(true)
+  const [revealed, setRevealed] = useState(false)
 
   const slope = dG(x)
   const curvature = d2G(x)
@@ -44,38 +45,32 @@ export default function ModelView() {
   return (
     <div className="space-y-16">
       {/* ---------------- Portada ---------------- */}
-      <section className="grid items-center gap-8 lg:grid-cols-[1.15fr_1fr]">
-        <div className="animate-rise">
-          <div className="mb-4 flex flex-wrap gap-2">
-            <Tag>Proyecto 5</Tag>
-            <Tag>Industria 4.0</Tag>
-            <Tag>Exponencial + Logarítmica</Tag>
+      {/* La portada plantea la pregunta; la respuesta se revela después del laboratorio */}
+      <section className="max-w-4xl animate-rise">
+        <h1 className="text-4xl font-bold leading-[1.05] tracking-tight text-balance sm:text-5xl lg:text-6xl">
+          ¿Cuántos mantenimientos al mes <span className="text-hazard">salvan la planta</span>?
+        </h1>
+        <p className="mt-5 max-w-[62ch] text-lg text-ink-300 sm:text-xl">
+          Pocos mantenimientos disparan el costo de <span className="text-fail">fallas graves</span>. Demasiados
+          inflan el <span className="text-ops">gasto operativo</span> de técnicos y software. En algún punto intermedio
+          el gasto es mínimo. ¿Dónde?
+        </p>
+        <Eq className="mt-6 text-lg sm:text-2xl">
+          <FormulaG s={S} />
+          <div className="mt-1 text-sm text-ink-400">
+            G en cientos de dólares · x = mantenimientos preventivos al mes · x ≥ 0
           </div>
-          <h1 className="text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">
-            ¿Cuántos mantenimientos al mes <span className="text-hazard">salvan la planta</span>?
-          </h1>
-          <p className="mt-5 max-w-xl text-lg text-ink-300">
-            Pocos mantenimientos disparan el costo de <span className="text-fail">fallas graves</span>. Demasiados
-            inflan el <span className="text-ops">gasto operativo</span> de técnicos y software. La derivada encuentra
-            el punto exacto de equilibrio.
-          </p>
-          <Eq className="mt-6 text-lg sm:text-xl">
-            <FormulaG s={S} />
-            <div className="mt-1 text-xs text-ink-400">G en cientos de dólares · x = mantenimientos preventivos al mes · x ≥ 0</div>
-          </Eq>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          <Stat label="Óptimo x*" value={num(xOpt, 2)} sub="mantenimientos / mes" tone="hazard" />
-          <Stat label="Gasto mínimo" value={usd(toUSD(gOpt))} sub={`G(x*) ≈ ${num(gOpt, 2)} cientos`} tone="ok" />
-          <Stat label="Sin mantenimiento" value={usd(toUSD(G(0)))} sub="G(0) = 200 cientos" tone="alarm" />
-          <Stat label="Ahorro vs. x = 0" value={usd(toUSD(G(0) - gOpt))} sub="por mes" tone="sensor" />
+        </Eq>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Tag>Proyecto 5</Tag>
+          <Tag>Industria 4.0</Tag>
+          <Tag>Exponencial + Logarítmica</Tag>
         </div>
       </section>
 
       {/* ---------------- Laboratorio interactivo ---------------- */}
       <section>
-        <SectionTitle kicker="Laboratorio" title="Mueve x y mira lo que dice la derivada">
+        <SectionTitle title="Mueve x y mira lo que dice la derivada">
           La recta punteada es la tangente: su pendiente es G′(x). Donde la tangente queda horizontal, el gasto es mínimo.
         </SectionTitle>
 
@@ -100,7 +95,7 @@ export default function ModelView() {
                 { f: (t: number) => G(t), color: 'var(--color-hazard)', label: 'Gasto total G(x)', width: 3.5 },
               ]}
               tangent={{ x, y: G(x), slope, color: nearOpt ? 'var(--color-ok)' : 'var(--color-ink-100)' }}
-              vLines={[{ x: xOpt, color: 'var(--color-ok)', label: `x* ≈ ${num(xOpt, 2)}` }]}
+              vLines={revealed ? [{ x: xOpt, color: 'var(--color-ok)', label: `x* ≈ ${num(xOpt, 2)}` }] : []}
               markers={[{ x, y: G(x), color: 'var(--color-hazard)', ring: true }]}
             />
           </div>
@@ -132,13 +127,15 @@ export default function ModelView() {
                     x={v}
                   </button>
                 ))}
-                <button
-                  type="button"
-                  onClick={() => setX(Number(xOpt.toFixed(2)))}
-                  className="cursor-pointer rounded-md border border-ok/50 px-2.5 py-1 font-mono text-xs text-ok hover:bg-ok/10"
-                >
-                  x*
-                </button>
+                {revealed && (
+                  <button
+                    type="button"
+                    onClick={() => setX(Number(xOpt.toFixed(2)))}
+                    className="cursor-pointer rounded-md border border-ok/50 px-2.5 py-1 font-mono text-xs text-ok hover:bg-ok/10"
+                  >
+                    x*
+                  </button>
+                )}
               </div>
               <label className="mt-4 flex cursor-pointer items-center gap-2 text-sm text-ink-300">
                 <input
@@ -155,7 +152,7 @@ export default function ModelView() {
               <Readout label="G(x)" value={`${num(G(x))} cientos`} sub={usd(toUSD(G(x)))} />
               <Readout label="G′(x)" value={signed(slope, 3)} sub="pendiente de la tangente" color={slope < -0.05 ? 'text-sensor' : slope > 0.05 ? 'text-alarm' : 'text-ok'} />
               <Readout label="G″(x)" value={signed(curvature, 3)} sub={curvature > 0 ? 'cóncava hacia arriba' : 'cóncava hacia abajo'} />
-              <Readout label="Presupuesto" value={usd(budgetLeft(x))} sub="de $15,000 que quedan" color={budgetLeft(x) < 0 ? 'text-alarm' : 'text-ok'} />
+              <Readout label="Presupuesto" value={usd(budgetLeft(x))} sub="quedan de $15,000" color={budgetLeft(x) < 0 ? 'text-alarm' : 'text-ok'} />
             </div>
 
             <div className={`rounded-xl border px-4 py-3 text-sm font-semibold ${status.cls}`}>{status.text}</div>
@@ -179,15 +176,49 @@ export default function ModelView() {
             yLabel="G′(x)"
             showLegend={false}
             curves={[{ f: (t: number) => dG(t), color: 'var(--color-sensor)', width: 3 }]}
-            vLines={[{ x: xOpt, color: 'var(--color-ok)', label: 'G′ = 0' }]}
+            vLines={revealed ? [{ x: xOpt, color: 'var(--color-ok)', label: 'G′ = 0' }] : []}
             markers={[{ x, y: slope, color: 'var(--color-hazard)' }]}
           />
         </div>
       </section>
 
+      {/* ---------------- Revelar el óptimo ---------------- */}
+      <section aria-live="polite">
+        {revealed ? (
+          <div className="animate-rise">
+            <SectionTitle title="El fondo del valle">
+              La tangente queda horizontal en x* ≈ {num(xOpt, 2)}: ahí G′(x) = 0 y el gasto es el menor posible.
+            </SectionTitle>
+            <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+              <Stat label="Óptimo x*" value={num(xOpt, 2)} sub="mantenimientos / mes" tone="hazard" />
+              <Stat label="Gasto mínimo" value={usd(toUSD(gOpt))} sub={`G(x*) ≈ ${num(gOpt, 2)} cientos`} tone="ok" />
+              <Stat label="Sin mantenimiento" value={usd(toUSD(G(0)))} sub="G(0) = 200 cientos" tone="alarm" />
+              <Stat label="Ahorro vs. x = 0" value={usd(toUSD(G(0) - gOpt))} sub="por mes" tone="sensor" />
+            </div>
+            <button
+              type="button"
+              onClick={() => setRevealed(false)}
+              className="mt-4 cursor-pointer text-sm text-ink-400 underline underline-offset-4 hover:text-ink-200"
+            >
+              Ocultar de nuevo para el siguiente grupo
+            </button>
+          </div>
+        ) : (
+          <div className="panel flex flex-col items-start gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-2xl font-bold tracking-tight">¿Ya encontraron dónde la tangente queda horizontal?</h2>
+              <p className="mt-1 text-ink-300">Muevan x en el laboratorio y, cuando tengan su respuesta, revélenla.</p>
+            </div>
+            <Button onClick={() => setRevealed(true)} className="shrink-0 px-6 py-4 text-base">
+              Revelar el óptimo
+            </Button>
+          </div>
+        )}
+      </section>
+
       {/* ---------------- Paso a paso ---------------- */}
       <section>
-        <SectionTitle kicker="Solución paso a paso" title="De la función al mínimo en 4 pasos" />
+        <SectionTitle title="De la función al mínimo en 4 pasos" />
         <div className="grid gap-4 md:grid-cols-2">
           <Step n={1} title="Primera derivada (tasa de cambio del gasto)">
             <p>Regla de la cadena en la exponencial y derivada de ln(u) = u′/u:</p>
@@ -240,7 +271,7 @@ export default function ModelView() {
 
       {/* ---------------- Método numérico ---------------- */}
       <section>
-        <SectionTitle kicker="Método numérico" title="Cómo se encontró x* sin poder despejar">
+        <SectionTitle title="Cómo se encontró x* sin poder despejar">
           Buscamos el x donde (x + 1)e<sup>−0.5x</sup> vale exactamente 0.4.
         </SectionTitle>
         <div className="grid gap-5 lg:grid-cols-2">
@@ -302,7 +333,7 @@ export default function ModelView() {
           </div>
         </div>
 
-        <div className="mt-5 rounded-xl border border-hazard/40 bg-hazard/5 px-5 py-4 text-sm text-ink-200">
+        <div className="mt-5 max-w-[72ch] rounded-xl border border-hazard/40 bg-hazard/5 px-5 py-4 text-sm text-ink-200">
           <b className="text-hazard">Nota de precisión:</b> el documento aproxima x* ≈ 5.56 y G ≈ 87.67 haciendo el
           tanteo a mano. Con más decimales, x* ≈ {num(xOpt, 3)} y G(x*) ≈ {num(gOpt, 3)}. La curva es tan plana cerca
           del mínimo que la diferencia de gasto entre ambos valores es de{' '}
@@ -313,7 +344,7 @@ export default function ModelView() {
 
       {/* ---------------- Decisión entera ---------------- */}
       <section>
-        <SectionTitle kicker="Decisión de planta" title="Pero no se pueden hacer 5.61 mantenimientos…">
+        <SectionTitle title="Pero no se pueden hacer 5.61 mantenimientos…">
           En la vida real se programa un número entero. Comparamos los vecinos del óptimo:
         </SectionTitle>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
@@ -340,7 +371,7 @@ export default function ModelView() {
 
       {/* ---------------- Guion ---------------- */}
       <section>
-        <SectionTitle kicker="Guion del stand" title="La explicación en 60 segundos" />
+        <SectionTitle title="La explicación en 60 segundos" />
         <ol className="grid gap-3 md:grid-cols-2">
           {[
             'Una planta con sensores IoT debe decidir cuántos mantenimientos preventivos hacer al mes (x).',
@@ -348,7 +379,7 @@ export default function ModelView() {
             'Si hace muchos, pagan técnicos y software: 40 ln(x+1) crece despacio pero nunca para.',
             'El gasto total G(x) tiene forma de valle. El fondo del valle es donde la pendiente G′(x) vale 0.',
             'G′(x) = 0 lleva a (x+1)e^(−0.5x) = 0.4, que resolvemos numéricamente: x* ≈ 5.6.',
-            'G″(x*) > 0 confirma que es un mínimo: unos $8,765 al mes. ¡Ahora compitan ustedes!',
+            `G″(x*) > 0 confirma que es un mínimo: unos ${usd(toUSD(gOpt))} al mes. ¡Ahora compitan ustedes!`,
           ].map((t, i) => (
             <li key={i} className="panel flex gap-4 p-4">
               <span className="font-mono text-2xl font-bold text-hazard">{String(i + 1).padStart(2, '0')}</span>
@@ -366,7 +397,7 @@ function Readout({ label, value, sub, color = 'text-ink-100' }: { label: string;
     <div className="flex items-baseline justify-between gap-3 px-5 py-3">
       <div>
         <div className="text-ink-400">{label}</div>
-        <div className="text-[11px] text-ink-500">{sub}</div>
+        <div className="text-xs text-ink-400">{sub}</div>
       </div>
       <div className={`tabular text-lg font-semibold ${color}`}>{value}</div>
     </div>

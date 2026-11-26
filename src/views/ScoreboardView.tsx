@@ -47,7 +47,7 @@ export default function ScoreboardView({ history, removeLast, clear, onDuel }: P
   return (
     <div className="space-y-10">
       <div className="flex flex-wrap items-end justify-between gap-4">
-        <SectionTitle kicker="Marcador del stand" title="Ranking de gerentes">
+        <SectionTitle title="Ranking de gerentes">
           {history.length} {history.length === 1 ? 'ronda jugada' : 'rondas jugadas'} · {table.length} gerentes
         </SectionTitle>
         <div className="mb-6 flex flex-wrap gap-2">
@@ -137,7 +137,7 @@ export default function ScoreboardView({ history, removeLast, clear, onDuel }: P
                 <header className="mb-3 flex items-baseline justify-between gap-2">
                   <span className="font-mono text-sm font-bold text-hazard">
                     Ronda {n}
-                    {r.solo && <span className="ml-2 rounded bg-ink-700 px-1.5 py-0.5 text-[10px] text-ink-300">SOLO</span>}
+                    {r.solo && <span className="ml-2 rounded bg-ink-700 px-1.5 py-0.5 text-xs text-ink-300">SOLO</span>}
                   </span>
                   <span className="truncate font-mono text-xs text-ink-400">
                     {getScenario(r.scenarioId).name} ·{' '}
@@ -160,7 +160,7 @@ export default function ScoreboardView({ history, removeLast, clear, onDuel }: P
                     </li>
                   ))}
                 </ul>
-                <div className="mt-3 border-t border-ink-800 pt-2 font-mono text-[11px] text-ink-500">
+                <div className="mt-3 border-t border-ink-800 pt-2 font-mono text-xs text-ink-500">
                   óptimo de la ronda: x* ≈ {num(r.optimum, 2)}
                 </div>
               </article>

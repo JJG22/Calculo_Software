@@ -58,7 +58,9 @@ export default function DuelView({ active, onRecord, onScoreboard }: Props) {
 
   const players = names.map((n) => n.trim())
   const keys = players.map(playerKey)
-  const duplicate = new Set(keys).size !== keys.length
+  // Solo compara los nombres ya escritos: dos campos vacíos no son "repetidos"
+  const filledKeys = keys.filter(Boolean)
+  const duplicate = new Set(filledKeys).size !== filledKeys.length
   const canStart = players.every((n) => n.length > 0) && !duplicate
 
   function startRound() {
@@ -137,7 +139,6 @@ export default function DuelView({ active, onRecord, onScoreboard }: Props) {
       {/* Barra superior del duelo */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <div className="font-mono text-xs uppercase tracking-[0.2em] text-hazard">Duelo competitivo</div>
           <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Gerentes de Planta en Crisis</h1>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -271,7 +272,7 @@ export default function DuelView({ active, onRecord, onScoreboard }: Props) {
               </li>
               <li>Gana quien conserve más presupuesto.</li>
             </ol>
-            <p className="rounded-xl border border-ink-700 bg-ink-950/50 p-3 text-sm">
+            <p className="border-t border-ink-700 pt-4 text-sm">
               <b className="text-ink-100">Reto solo (1 gerente):</b> sin rival, compites contra el óptimo. 🥇 a ±0.3 (+4) ·
               🥈 a ±1 (+3) · 🥉 a ±2 (+1).
             </p>
@@ -298,7 +299,7 @@ export default function DuelView({ active, onRecord, onScoreboard }: Props) {
           <div>
             <Progress players={players} done={entries.length} />
             <div className="mt-8 font-mono text-sm uppercase tracking-[0.25em] text-ink-400">Turno de</div>
-            <div className="mt-2 text-5xl font-bold sm:text-7xl" style={{ color }}>
+            <div className="mt-2 max-w-full break-words text-5xl font-bold text-balance sm:text-7xl" style={{ color }}>
               {players[turn]}
             </div>
             <p className="mx-auto mt-5 max-w-md text-lg text-ink-300">
@@ -355,6 +356,7 @@ export default function DuelView({ active, onRecord, onScoreboard }: Props) {
               onSubmit={confirmEntry}
               max={MAX_MAINTENANCES}
               active={active && variant === 'local' && phase === 'entry'}
+              masked
               accent={color}
             />
           </div>
@@ -398,7 +400,7 @@ function ModeCard({
     >
       <div className="flex items-center justify-between">
         <span className={`text-lg font-bold ${selected ? 'text-hazard' : 'text-ink-100'}`}>{title}</span>
-        <span className="font-mono text-[10px] uppercase tracking-wider text-ink-400">{badge}</span>
+        <span className="font-mono text-xs uppercase tracking-wider text-ink-400">{badge}</span>
       </div>
       <p className="mt-1 text-sm text-ink-300">{text}</p>
     </button>

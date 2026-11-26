@@ -50,7 +50,7 @@ interface ChartProps {
 }
 
 const W = 800
-const PAD = { l: 60, r: 20, t: 22, b: 46 }
+const PAD = { l: 66, r: 20, t: 26, b: 54 }
 
 function niceStep(range: number, count: number) {
   const raw = range / count
@@ -149,11 +149,11 @@ export function Chart({
           <g key={`y${v}`}>
             <line x1={PAD.l} x2={W - PAD.r} y1={sy(v)} y2={sy(v)} stroke="var(--color-ink-700)" strokeWidth={1} />
             <text
-              x={PAD.l - 10}
+              x={PAD.l - 12}
               y={sy(v)}
               textAnchor="end"
               dominantBaseline="middle"
-              className="fill-ink-400 font-mono text-[12px]"
+              className="fill-ink-300 font-mono text-[16px]"
             >
               {tickLabel(v)}
             </text>
@@ -162,7 +162,7 @@ export function Chart({
         {xt.map((v) => (
           <g key={`x${v}`}>
             <line x1={sx(v)} x2={sx(v)} y1={PAD.t} y2={H - PAD.b} stroke="var(--color-ink-800)" strokeWidth={1} />
-            <text x={sx(v)} y={H - PAD.b + 20} textAnchor="middle" className="fill-ink-400 font-mono text-[12px]">
+            <text x={sx(v)} y={H - PAD.b + 24} textAnchor="middle" className="fill-ink-300 font-mono text-[16px]">
               {tickLabel(v)}
             </text>
           </g>
@@ -195,7 +195,7 @@ export function Chart({
                 strokeDasharray="5 5"
               />
               {v.label && (
-                <text x={sx(v.x) + 6} y={PAD.t + 16} className="font-mono text-[12px]" fill={v.color}>
+                <text x={sx(v.x) + 6} y={PAD.t + 20} className="font-mono text-[15px] font-semibold" fill={v.color}>
                   {v.label}
                 </text>
               )}
@@ -254,7 +254,7 @@ export function Chart({
               x={Math.min(W - PAD.r - 4, Math.max(PAD.l + 4, sx(m.x)))}
               y={Math.max(PAD.t + 12, sy(m.y) - 16 - (i % 2) * 16)}
               textAnchor="middle"
-              className="font-mono text-[13px] font-semibold"
+              className="font-mono text-[17px] font-semibold"
               fill={m.color}
               stroke="var(--color-ink-950)"
               strokeWidth={4}
@@ -266,17 +266,17 @@ export function Chart({
         )}
 
         {xLabel && (
-          <text x={PAD.l + plotW / 2} y={H - 6} textAnchor="middle" className="fill-ink-300 text-[13px]">
+          <text x={PAD.l + plotW / 2} y={H - 8} textAnchor="middle" className="fill-ink-300 text-[16px]">
             {xLabel}
           </text>
         )}
         {yLabel && (
           <text
-            x={16}
+            x={18}
             y={PAD.t + plotH / 2}
             textAnchor="middle"
-            transform={`rotate(-90 16 ${PAD.t + plotH / 2})`}
-            className="fill-ink-300 text-[13px]"
+            transform={`rotate(-90 18 ${PAD.t + plotH / 2})`}
+            className="fill-ink-300 text-[16px]"
           >
             {yLabel}
           </text>
@@ -284,7 +284,7 @@ export function Chart({
       </svg>
 
       {showLegend && curves.some((c) => c.label) && (
-        <figcaption className="mt-2 flex flex-wrap gap-x-5 gap-y-1 pl-[7.5%] text-sm text-ink-300">
+        <figcaption className="mt-3 flex flex-wrap gap-x-6 gap-y-1 pl-[8%] text-base text-ink-300">
           {curves
             .filter((c) => c.label)
             .map((c) => (

@@ -136,7 +136,7 @@ export function HostRoom({ onRecord, onScoreboard }: Props) {
                         <span className="min-w-0 flex-1 truncate text-lg font-bold" style={{ color }}>
                           {p.name}
                         </span>
-                        {!p.connected && <span className="font-mono text-[10px] text-hazard">sin señal</span>}
+                        {!p.connected && <span className="font-mono text-xs text-hazard">sin señal</span>}
                         <KickButton onClick={() => send({ t: 'host:kick', playerId: p.id })} name={p.name} />
                       </>
                     ) : (
@@ -257,7 +257,7 @@ function KickButton({ onClick, name }: { onClick: () => void; name: string }) {
       onClick={() => {
         if (window.confirm(`¿Sacar a ${name} de la sala?`)) onClick()
       }}
-      className="cursor-pointer rounded-md border border-ink-600 px-2 py-0.5 font-mono text-[11px] text-ink-400 hover:border-alarm hover:text-alarm"
+      className="cursor-pointer rounded-md border border-ink-600 px-2 py-0.5 font-mono text-xs text-ink-400 hover:border-alarm hover:text-alarm"
       title={`Sacar a ${name}`}
     >
       sacar
@@ -294,7 +294,7 @@ function JoinCard({ code }: { code: string }) {
       </div>
       <div className="mt-5 text-sm text-ink-400">o entra a la página y escribe el código</div>
       <div className="mt-1 font-mono text-6xl font-bold tracking-[0.2em] text-hazard">{code}</div>
-      <div className="mt-3 break-all font-mono text-[11px] text-ink-500">{url}</div>
+      <div className="mt-3 break-all font-mono text-xs text-ink-500">{url}</div>
       {isLocalhost && (
         <p className="mt-4 rounded-lg border border-hazard/40 bg-hazard/10 p-3 text-left text-xs text-hazard">
           Estás en <b>localhost</b>: los celulares no pueden abrir esa dirección. Abre la app con la dirección de red que

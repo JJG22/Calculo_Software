@@ -1,4 +1,4 @@
-import { useEffect, useRef, type Dispatch, type SetStateAction } from 'react'
+import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react'
 import { sfx } from '../lib/sound'
 
 interface KeypadProps {
@@ -9,6 +9,8 @@ interface KeypadProps {
   /** Solo escucha el teclado físico cuando está activo */
   active: boolean
   accent: string
+  /** Oculta el número con • (para pantallas que ve el público); se ve manteniendo presionado "Ver" */
+  masked?: boolean
 }
 
 const MAX_DECIMALS = 2
@@ -33,7 +35,9 @@ export function isValidEntry(v: string, max: number): boolean {
   return Number.isFinite(n) && n >= 0 && n <= max
 }
 
-export function Keypad({ value, setValue, onSubmit, max, active, accent }: KeypadProps) {
+export function Keypad({ value, setValue, onSubmit, max, active, accent, masked = false }: KeypadProps) {
+  const [peek, setPeek] = useState(false)
+  const hidden = masked && !peek
   const submitRef = useRef(onSubmit)
   submitRef.current = onSubmit
 
@@ -73,14 +77,31 @@ export function Keypad({ value, setValue, onSubmit, max, active, accent }: Keypa
   return (
     <div className="w-full">
       <div
-        className="mb-4 flex h-24 items-center justify-end rounded-2xl border-2 bg-ink-950 px-5 font-mono"
+        className="mb-4 flex h-24 items-center justify-end gap-3 rounded-2xl border-2 bg-ink-950 px-5 font-mono"
         style={{ borderColor: accent }}
-        aria-live="polite"
+        // Un lector de pantalla no debe anunciar en voz alta un valor secreto
+        aria-live={masked ? 'off' : 'polite'}
       >
-        <span className="tabular text-6xl font-bold" style={{ color: value ? accent : 'var(--color-ink-600)' }}>
-          {value || '0'}
+        {masked && value && (
+          <button
+            type="button"
+            onPointerDown={() => setPeek(true)}
+            onPointerUp={() => setPeek(false)}
+            onPointerLeave={() => setPeek(false)}
+            onPointerCancel={() => setPeek(false)}
+            className="mr-auto cursor-pointer select-none rounded-lg border border-ink-600 px-3 py-1.5 font-sans text-xs font-semibold text-ink-300 hover:border-ink-400"
+          >
+            Mantén para ver
+          </button>
+        )}
+        <span
+          className="tabular text-6xl font-bold"
+          style={{ color: value ? accent : 'var(--color-ink-600)' }}
+          aria-label={hidden && value ? `${value.length} caracteres ocultos` : undefined}
+        >
+          {value ? (hidden ? '•'.repeat(value.length) : value) : '0'}
         </span>
-        <span className="ml-1 h-12 w-1 animate-blink" style={{ background: accent }} />
+        <span className="h-12 w-1 animate-blink" style={{ background: accent }} />
       </div>
 
       <div className="grid grid-cols-3 gap-2.5">

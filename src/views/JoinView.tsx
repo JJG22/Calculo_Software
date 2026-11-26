@@ -129,7 +129,7 @@ export default function JoinView({ codeFromUrl }: { codeFromUrl: string }) {
               autoCapitalize="characters"
               autoComplete="off"
               inputMode="text"
-              className="mt-1 h-16 w-full rounded-xl border border-ink-600 bg-ink-950 px-4 text-center font-mono text-4xl font-bold uppercase tracking-[0.3em] text-hazard outline-none placeholder:text-ink-700 focus:border-hazard"
+              className="mt-1 h-16 w-full rounded-xl border border-ink-600 bg-ink-950 px-4 text-center font-mono text-4xl font-bold uppercase tracking-[0.3em] text-hazard outline-none placeholder:text-ink-500 focus:border-hazard"
             />
           </label>
           <label className="block">
@@ -140,7 +140,7 @@ export default function JoinView({ codeFromUrl }: { codeFromUrl: string }) {
               maxLength={MAX_NAME_LENGTH}
               placeholder="Ej. Laura"
               autoComplete="given-name"
-              className="mt-1 h-14 w-full rounded-xl border border-ink-600 bg-ink-950 px-4 text-xl text-ink-100 outline-none placeholder:text-ink-600 focus:border-hazard"
+              className="mt-1 h-14 w-full rounded-xl border border-ink-600 bg-ink-950 px-4 text-xl text-ink-100 outline-none placeholder:text-ink-500 focus:border-hazard"
             />
           </label>
           {formError && <p className="rounded-lg bg-alarm/10 p-3 text-sm text-alarm">{formError}</p>}
@@ -312,11 +312,11 @@ function Shell({ children }: { children: ReactNode }) {
   return (
     <div className="grid-bg min-h-screen">
       <div className="hazard-stripes h-1.5" />
-      <div className="mx-auto max-w-md px-5 pb-12 pt-6">
-        <div className="mb-6 flex items-center gap-2 font-mono text-xs uppercase tracking-[0.2em] text-ink-400">
-          <span className="size-2 rounded-full bg-hazard" /> Planta IoT · Gerentes en crisis
-        </div>
+      <div className="mx-auto max-w-md px-5 pb-8 pt-8">
         {children}
+        <footer className="mt-12 flex items-center justify-center gap-2 text-xs text-ink-400">
+          <span className="size-2 rounded-full bg-hazard" aria-hidden /> Planta IoT · Gerentes de Planta en Crisis
+        </footer>
       </div>
     </div>
   )

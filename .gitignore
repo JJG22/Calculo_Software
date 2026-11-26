@@ -1,6 +1,12 @@
 node_modules
 dist
 build-server
+
+# Configuración personal de Claude Code (hooks locales)
+.claude/settings.local.json
 *.log
 .DS_Store
 .vite
+
+# Informes locales de revisiones de diseño (impeccable)
+.impeccable/
