@@ -123,3 +123,29 @@ describe('salas en línea', () => {
     expect(host.room().phase).toBe('reveal')
   })
 })
+
+describe('reto en solitario en línea', () => {
+  it('se puede iniciar con un solo jugador y se puntúa contra el óptimo', () => {
+    const m = new RoomManager()
+    const host = new FakeConn()
+    m.handle(host, { t: 'host:create', clientId: 'h', mode: 'clasico' })
+    const code = host.room().code
+    const a = new FakeConn()
+    m.handle(a, { t: 'player:join', clientId: 'a', code, name: 'Ana' })
+    m.handle(host, { t: 'host:start' })
+    expect(host.room().phase).toBe('deciding')
+    m.handle(a, { t: 'player:submit', x: 5.6 })
+    const room = host.room()
+    expect(room.phase).toBe('reveal')
+    expect(room.record?.solo).toBe(true)
+    expect(room.record?.players[0].points).toBe(4)
+  })
+
+  it('no inicia una sala vacía', () => {
+    const m = new RoomManager()
+    const host = new FakeConn()
+    m.handle(host, { t: 'host:create', clientId: 'h', mode: 'clasico' })
+    m.handle(host, { t: 'host:start' })
+    expect(host.lastError()).toBe('not_enough_players')
+  })
+})

@@ -10,7 +10,35 @@ import {
   newtonSteps,
   optimum,
 } from './model'
-import { scoreRound, standings, WIN_POINTS, BONUS_POINTS } from './scoring'
+import { scoreRound, soloEfficiency, soloTier, standings, WIN_POINTS, BONUS_POINTS } from './scoring'
+
+describe('reto en solitario', () => {
+  const xOpt = optimum(BASE_SCENARIO)
+
+  it('asigna medallas según la distancia al óptimo', () => {
+    expect(soloTier(5.6, xOpt).id).toBe('oro')
+    expect(soloTier(6.5, xOpt).id).toBe('plata')
+    expect(soloTier(4, xOpt).id).toBe('bronce')
+    expect(soloTier(1, xOpt).id).toBe('ninguna')
+  })
+
+  it('puntúa contra el óptimo, sin regalar la victoria', () => {
+    const oro = scoreRound([{ name: 'Ana', x: 5.6 }], BASE_SCENARIO)
+    expect(oro.solo).toBe(true)
+    expect(oro.players[0].points).toBe(WIN_POINTS + BONUS_POINTS)
+    expect(oro.players[0].winner).toBe(true)
+
+    const lejos = scoreRound([{ name: 'Beto', x: 1 }], BASE_SCENARIO)
+    expect(lejos.players[0].winner).toBe(false)
+    expect(lejos.players[0].points).toBe(0)
+  })
+
+  it('la eficiencia es 100 % en el óptimo y 0 % sin mantenimientos', () => {
+    expect(soloEfficiency(xOpt, BASE_SCENARIO)).toBeCloseTo(1, 9)
+    expect(soloEfficiency(0, BASE_SCENARIO)).toBeCloseTo(0, 9)
+    expect(soloEfficiency(3, BASE_SCENARIO)).toBeLessThan(1)
+  })
+})
 
 describe('modelo oficial G(x) = 200e^(−0.5x) + 40 ln(x+1)', () => {
   const xOpt = optimum(BASE_SCENARIO)

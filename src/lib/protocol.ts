@@ -8,7 +8,8 @@ export type OnlineMode = 'clasico' | 'experto'
 export type RoomPhase = 'lobby' | 'deciding' | 'reveal'
 
 export const MAX_ONLINE_PLAYERS = 4
-export const MIN_ONLINE_PLAYERS = 2
+/** Con 1 jugador la ronda es un reto en solitario contra el óptimo. */
+export const MIN_ONLINE_PLAYERS = 1
 export const MAX_NAME_LENGTH = 24
 export const ROOM_CODE_LENGTH = 4
 /** Sin I, O ni números: el código se lee en voz alta y se teclea en el celular sin confusiones. */

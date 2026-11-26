@@ -168,7 +168,11 @@ export function HostRoom({ onRecord, onScoreboard }: Props) {
 
             <div className="mt-auto flex flex-wrap gap-3">
               <Button className="flex-1 py-4 text-base" disabled={!enough} onClick={() => send({ t: 'host:start' })}>
-                {enough ? 'Iniciar ronda ▶' : `Faltan ${MIN_ONLINE_PLAYERS - room.players.length} gerente(s)`}
+                {!enough
+                  ? 'Esperando gerentes…'
+                  : room.players.length === 1
+                    ? 'Iniciar reto solo ▶'
+                    : 'Iniciar duelo ▶'}
               </Button>
               {room.players.length > 0 && (
                 <Button variant="ghost" onClick={() => send({ t: 'host:newPair' })}>

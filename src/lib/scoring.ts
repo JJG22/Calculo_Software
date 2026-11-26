@@ -42,13 +42,83 @@ export interface RoundRecord {
   at: number
   scenarioId: string
   optimum: number
+  /** Reto en solitario: se puntúa contra el óptimo, no contra otro jugador */
+  solo?: boolean
   players: PlayerResult[]
 }
 
 const makeId = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
 
+/* ---------------- Reto en solitario ---------------- */
+
+export type SoloTier = 'oro' | 'plata' | 'bronce' | 'ninguna'
+
+export interface SoloTierInfo {
+  id: SoloTier
+  label: string
+  emoji: string
+  /** Distancia máxima al óptimo para obtenerla */
+  maxError: number
+  points: number
+  /** Cuenta como reto superado (victoria en el marcador) */
+  passed: boolean
+}
+
+export const SOLO_TIERS: SoloTierInfo[] = [
+  { id: 'oro', label: 'Medalla de oro', emoji: '🥇', maxError: BONUS_TOLERANCE, points: WIN_POINTS + BONUS_POINTS, passed: true },
+  { id: 'plata', label: 'Medalla de plata', emoji: '🥈', maxError: 1, points: WIN_POINTS, passed: true },
+  { id: 'bronce', label: 'Medalla de bronce', emoji: '🥉', maxError: 2, points: 1, passed: false },
+  { id: 'ninguna', label: 'Sin medalla', emoji: '🔧', maxError: Infinity, points: 0, passed: false },
+]
+
+export function soloTier(x: number, xOpt: number): SoloTierInfo {
+  const err = Math.abs(x - xOpt)
+  return SOLO_TIERS.find((t) => err <= t.maxError) ?? SOLO_TIERS[SOLO_TIERS.length - 1]
+}
+
+/** Máximo presupuesto que se podía conservar (USD), eligiendo x = x*. */
+export const maxBudgetLeft = (s: Scenario) => budgetLeft(optimum(s), s)
+
+/**
+ * Qué parte del ahorro máximo logró el jugador, de 0 a 1 (puede ser negativa si quebró).
+ * Se compara contra no hacer mantenimientos (x = 0), el peor caso "natural".
+ */
+export function soloEfficiency(x: number, s: Scenario): number {
+  const worst = budgetLeft(0, s)
+  const best = maxBudgetLeft(s)
+  return (budgetLeft(x, s) - worst) / (best - worst)
+}
+
 export function scoreRound(entries: PlayerEntry[], s: Scenario): RoundRecord {
   const xOpt = optimum(s)
+
+  if (entries.length === 1) {
+    const [e] = entries
+    const tier = soloTier(e.x, xOpt)
+    const cost = G(e.x, s)
+    return {
+      id: makeId(),
+      at: Date.now(),
+      scenarioId: s.id,
+      optimum: xOpt,
+      solo: true,
+      players: [
+        {
+          name: e.name,
+          x: e.x,
+          cost,
+          failure: failureCost(e.x, s),
+          operating: operatingCost(e.x, s),
+          left: budgetLeft(e.x, s),
+          slope: dG(e.x, s),
+          winner: tier.passed,
+          bonus: tier.id === 'oro',
+          points: tier.points,
+        },
+      ],
+    }
+  }
+
   const costs = entries.map((e) => G(e.x, s))
   const best = Math.min(...costs)
 
@@ -129,6 +199,7 @@ export function historyToCSV(history: RoundRecord[]): string {
     'ronda',
     'fecha',
     'planta',
+    'modo',
     'jugador',
     'mantenimientos_x',
     'gasto_usd',
@@ -143,6 +214,7 @@ export function historyToCSV(history: RoundRecord[]): string {
       i + 1,
       new Date(r.at).toLocaleString('es-CO'),
       getScenario(r.scenarioId).name,
+      r.solo ? 'solo' : 'duelo',
       p.name,
       qty(p.x),
       Math.round(toUSD(p.cost)),

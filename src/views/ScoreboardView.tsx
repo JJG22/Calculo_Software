@@ -135,7 +135,10 @@ export default function ScoreboardView({ history, removeLast, clear, onDuel }: P
             .map(({ r, n }) => (
               <article key={r.id} className="panel p-4">
                 <header className="mb-3 flex items-baseline justify-between gap-2">
-                  <span className="font-mono text-sm font-bold text-hazard">Ronda {n}</span>
+                  <span className="font-mono text-sm font-bold text-hazard">
+                    Ronda {n}
+                    {r.solo && <span className="ml-2 rounded bg-ink-700 px-1.5 py-0.5 text-[10px] text-ink-300">SOLO</span>}
+                  </span>
                   <span className="truncate font-mono text-xs text-ink-400">
                     {getScenario(r.scenarioId).name} ·{' '}
                     {new Date(r.at).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })}

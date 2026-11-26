@@ -6,7 +6,7 @@ import { qty, usd } from '../lib/format'
 import { getScenario, toUSD } from '../lib/model'
 import { getClientId, useRoomConnection } from '../lib/online'
 import { MAX_NAME_LENGTH, ROOM_CODE_LENGTH, normalizeCode } from '../lib/protocol'
-import { MAX_MAINTENANCES, type RoundRecord } from '../lib/scoring'
+import { MAX_MAINTENANCES, soloEfficiency, soloTier, type RoundRecord } from '../lib/scoring'
 import { sfx } from '../lib/sound'
 import { verdict } from '../lib/verdict'
 
@@ -258,13 +258,20 @@ function MyResult({
   if (!mine) return null
   const v = verdict(mine, record.optimum)
   const scenario = getScenario(record.scenarioId)
+  const tier = record.solo ? soloTier(mine.x, record.optimum) : null
 
   return (
     <div className="animate-rise text-center">
-      <div className="text-6xl">{mine.winner ? '🏆' : '📉'}</div>
+      <div className="text-6xl">{tier ? tier.emoji : mine.winner ? '🏆' : '📉'}</div>
       <h1 className="mt-3 text-4xl font-bold" style={{ color: mine.winner ? 'var(--color-hazard)' : color }}>
-        {mine.winner ? '¡Ganaste!' : 'Esta vez no'}
+        {tier ? tier.label : mine.winner ? '¡Ganaste!' : 'Esta vez no'}
       </h1>
+      {tier && (
+        <div className="mt-1 text-ink-300">
+          Eficiencia: <b className="text-hazard">{Math.round(Math.max(0, soloEfficiency(mine.x, scenario)) * 100)}%</b> del
+          ahorro máximo
+        </div>
+      )}
       <div className="mt-1 font-mono text-3xl font-bold text-hazard">+{mine.points} pts</div>
 
       <div className="panel mt-6 space-y-2 p-4 text-left font-mono text-sm">
@@ -285,7 +292,9 @@ function MyResult({
           Óptimo: x* ≈ {record.optimum.toFixed(2)} mantenimientos.
         </div>
       </div>
-      <p className="mt-6 text-sm text-ink-500">Espera la revancha o la siguiente pareja.</p>
+      <p className="mt-6 text-sm text-ink-500">
+        {record.solo ? 'Espera a que el stand te dé otro intento.' : 'Espera la revancha o la siguiente pareja.'}
+      </p>
     </div>
   )
 }

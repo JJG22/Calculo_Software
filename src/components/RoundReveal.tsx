@@ -5,7 +5,15 @@ import { Button, PLAYER_COLORS } from './ui'
 import { easeOutCubic, useProgress } from '../lib/hooks'
 import { num, qty, usd } from '../lib/format'
 import { type Scenario, G, criticalRhs, toUSD } from '../lib/model'
-import { BONUS_POINTS, WIN_POINTS, type RoundRecord } from '../lib/scoring'
+import {
+  BONUS_POINTS,
+  SOLO_TIERS,
+  WIN_POINTS,
+  maxBudgetLeft,
+  soloEfficiency,
+  soloTier,
+  type RoundRecord,
+} from '../lib/scoring'
 import { sfx } from '../lib/sound'
 import { verdict } from '../lib/verdict'
 
@@ -26,12 +34,16 @@ export function RoundReveal({ record, scenario: s, onRematch, onNewPlayers, onSc
   const xOpt = record.optimum
   const winners = record.players.filter((pl) => pl.winner)
   const someoneBroke = record.players.some((pl) => pl.left < 0)
+  const solo = record.solo === true && record.players.length === 1
+  const soloPlayer = record.players[0]
+  const tier = soloTier(soloPlayer.x, xOpt)
+  const celebrate = solo ? tier.passed : true
 
   useEffect(() => {
     if (!done) return
-    sfx.win()
-    if (someoneBroke) window.setTimeout(sfx.alarm, 700)
-  }, [done, someoneBroke])
+    if (celebrate) sfx.win()
+    if (someoneBroke || !celebrate) window.setTimeout(sfx.alarm, 700)
+  }, [done, someoneBroke, celebrate])
 
   const xMax = Math.max(15, Math.ceil(Math.max(...record.players.map((pl) => pl.x)) + 1))
   const yTop = Math.max(G(0, s), ...record.players.map((pl) => pl.cost)) * 1.06
@@ -42,7 +54,20 @@ export function RoundReveal({ record, scenario: s, onRematch, onNewPlayers, onSc
       <div
         className={`panel relative overflow-hidden px-6 py-6 text-center transition-colors duration-500 ${done ? 'border-hazard' : ''}`}
       >
-        {done ? (
+        {done && solo ? (
+          <div className="animate-pop">
+            <div className="font-mono text-xs uppercase tracking-[0.25em] text-hazard">
+              Reto en solitario · {tier.passed ? 'reto superado' : 'reto no superado'}
+            </div>
+            <div className="mt-2 text-3xl font-bold sm:text-5xl">
+              {tier.emoji} {tier.label}
+            </div>
+            <div className="mt-2 text-ink-300">
+              {soloPlayer.name} conserva <b className={soloPlayer.left < 0 ? 'text-alarm' : 'text-ok'}>{usd(soloPlayer.left)}</b>{' '}
+              de un máximo posible de <b className="text-ok">{usd(maxBudgetLeft(s))}</b>
+            </div>
+          </div>
+        ) : done ? (
           <div className="animate-pop">
             <div className="font-mono text-xs uppercase tracking-[0.25em] text-hazard">
               {winners.length > 1 ? 'Empate técnico' : 'Gerente ganador'}
@@ -133,10 +158,15 @@ export function RoundReveal({ record, scenario: s, onRematch, onNewPlayers, onSc
                   <div className={`font-bold ${v.cls}`}>{v.title}</div>
                   <div className="text-ink-300">{v.text}</div>
                   <div className="mt-2 flex flex-wrap gap-1.5 font-mono text-[11px]">
-                    {pl.winner && (
+                    {solo && (
+                      <span className="rounded bg-hazard/15 px-2 py-0.5 text-hazard">
+                        {tier.emoji} {tier.label} +{tier.points}
+                      </span>
+                    )}
+                    {!solo && pl.winner && (
                       <span className="rounded bg-hazard/15 px-2 py-0.5 text-hazard">Victoria +{WIN_POINTS}</span>
                     )}
-                    {pl.bonus && (
+                    {!solo && pl.bonus && (
                       <span className="rounded bg-ok/15 px-2 py-0.5 text-ok">Bono precisión +{BONUS_POINTS}</span>
                     )}
                   </div>
@@ -145,13 +175,15 @@ export function RoundReveal({ record, scenario: s, onRematch, onNewPlayers, onSc
             </article>
           )
         })}
+
+        {solo && <SoloScore x={soloPlayer.x} xOpt={xOpt} scenario={s} progress={e} done={done} />}
       </div>
 
       {/* Gráfica y solución */}
       <div className="grid gap-5 xl:grid-cols-[1fr_380px]">
         <div className="panel p-4 sm:p-6">
           <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
-            <h3 className="font-bold">¿Dónde cayó cada gerente?</h3>
+            <h3 className="font-bold">{solo ? '¿Qué tan cerca quedaste del óptimo?' : '¿Dónde cayó cada gerente?'}</h3>
             <span className="font-mono text-sm text-ink-400">
               <FormulaG s={s} />
             </span>
@@ -201,15 +233,74 @@ export function RoundReveal({ record, scenario: s, onRematch, onNewPlayers, onSc
 
       <div className="flex flex-wrap justify-center gap-3">
         <Button onClick={onRematch} disabled={!done}>
-          ↻ Revancha (mismos gerentes)
+          {solo ? '↻ Intentar de nuevo' : '↻ Revancha (mismos gerentes)'}
         </Button>
         <Button variant="ghost" onClick={onNewPlayers} disabled={!done}>
-          Siguiente pareja
+          {solo ? 'Siguiente jugador' : 'Siguiente pareja'}
         </Button>
         <Button variant="ghost" onClick={onScoreboard}>
           Ver marcador
         </Button>
       </div>
     </div>
+  )
+}
+
+/** Panel del reto en solitario: eficiencia frente al óptimo y escala de medallas. */
+function SoloScore({
+  x,
+  xOpt,
+  scenario,
+  progress,
+  done,
+}: {
+  x: number
+  xOpt: number
+  scenario: Scenario
+  progress: number
+  done: boolean
+}) {
+  const eff = soloEfficiency(x, scenario)
+  const shown = Math.max(0, eff) * progress
+  const current = soloTier(x, xOpt)
+  const err = Math.abs(x - xOpt)
+
+  return (
+    <article className="panel flex flex-col gap-4 p-5">
+      <div>
+        <div className="font-mono text-xs uppercase tracking-[0.16em] text-ink-400">Eficiencia del gerente</div>
+        <div className="tabular mt-1 font-mono text-5xl font-bold text-hazard">{Math.round(shown * 100)}%</div>
+        <div className="text-sm text-ink-400">del ahorro máximo posible frente a no hacer mantenimientos</div>
+        <div className="mt-3 h-3 overflow-hidden rounded-full bg-ink-800">
+          <div className="h-full rounded-full bg-hazard" style={{ width: `${Math.min(1, shown) * 100}%` }} />
+        </div>
+      </div>
+
+      <div>
+        <div className="mb-2 font-mono text-xs uppercase tracking-[0.16em] text-ink-400">
+          Distancia al óptimo: ±{num(err, 2)}
+        </div>
+        <ul className="space-y-1.5 text-sm">
+          {SOLO_TIERS.map((t) => {
+            const active = done && t.id === current.id
+            return (
+              <li
+                key={t.id}
+                className={`flex items-center justify-between rounded-lg border px-3 py-1.5 transition ${
+                  active ? 'border-hazard bg-hazard/10 text-ink-100' : 'border-ink-700 text-ink-400'
+                }`}
+              >
+                <span>
+                  {t.emoji} {t.label}
+                </span>
+                <span className="font-mono text-xs">
+                  {Number.isFinite(t.maxError) ? `±${t.maxError}` : 'más lejos'} · +{t.points}
+                </span>
+              </li>
+            )
+          })}
+        </ul>
+      </div>
+    </article>
   )
 }

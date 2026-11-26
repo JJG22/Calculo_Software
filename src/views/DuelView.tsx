@@ -188,8 +188,8 @@ export default function DuelView({ active, onRecord, onScoreboard }: Props) {
         <div className="grid gap-5 lg:grid-cols-[1.3fr_1fr]">
           <section className="panel animate-rise p-6">
             <h2 className="text-xl font-bold">1 · ¿Quiénes compiten?</h2>
-            <div className="mt-4 flex gap-2">
-              {[2, 3, 4].map((n) => (
+            <div className="mt-4 flex flex-wrap gap-2">
+              {[1, 2, 3, 4].map((n) => (
                 <button
                   key={n}
                   type="button"
@@ -200,7 +200,7 @@ export default function DuelView({ active, onRecord, onScoreboard }: Props) {
                       : 'border-ink-600 text-ink-300 hover:border-ink-400'
                   }`}
                 >
-                  {n} gerentes
+                  {n === 1 ? '1 · reto solo' : `${n} gerentes`}
                 </button>
               ))}
             </div>
@@ -271,6 +271,10 @@ export default function DuelView({ active, onRecord, onScoreboard }: Props) {
               </li>
               <li>Gana quien conserve más presupuesto.</li>
             </ol>
+            <p className="rounded-xl border border-ink-700 bg-ink-950/50 p-3 text-sm">
+              <b className="text-ink-100">Reto solo (1 gerente):</b> sin rival, compites contra el óptimo. 🥇 a ±0.3 (+4) ·
+              🥈 a ±1 (+3) · 🥉 a ±2 (+1).
+            </p>
             <div className="grid grid-cols-2 gap-3 pt-2">
               <div className="rounded-xl border border-hazard/40 bg-hazard/5 p-3">
                 <div className="font-mono text-2xl font-bold text-hazard">+{WIN_POINTS}</div>
@@ -298,7 +302,13 @@ export default function DuelView({ active, onRecord, onScoreboard }: Props) {
               {players[turn]}
             </div>
             <p className="mx-auto mt-5 max-w-md text-lg text-ink-300">
-              Los demás gerentes: <b className="text-ink-100">¡miren hacia otro lado!</b> 👀
+              {players.length === 1 ? (
+                <>Reto en solitario: tu rival es la derivada. ¿Qué tan cerca del óptimo puedes quedar?</>
+              ) : (
+                <>
+                  Los demás gerentes: <b className="text-ink-100">¡miren hacia otro lado!</b> 👀
+                </>
+              )}
             </p>
             <Button className="mt-8 px-8 py-4 text-base" onClick={() => setPhase('entry')}>
               Soy {players[turn]}, estoy listo
