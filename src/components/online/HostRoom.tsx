@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Icon } from '../Icon'
+import { Icon, TierIcon } from '../Icon'
 import QRCode from 'qrcode'
 import { FormulaG } from '../MathText'
 import { RoundReveal } from '../RoundReveal'
@@ -7,7 +7,7 @@ import { Button, PLAYER_COLORS, Tag } from '../ui'
 import { getScenario } from '../../lib/model'
 import { getClientId, joinUrl, useRoomConnection } from '../../lib/online'
 import { MAX_ONLINE_PLAYERS, MIN_ONLINE_PLAYERS, type OnlineMode } from '../../lib/protocol'
-import type { RoundRecord } from '../../lib/scoring'
+import { standings, type RoundRecord } from '../../lib/scoring'
 import { sfx } from '../../lib/sound'
 
 const HOST_ROOM_KEY = 'planta-iot-duelo/host-room'
@@ -30,10 +30,11 @@ const storeCode = (code: string | null) => {
 
 interface Props {
   onRecord: (r: RoundRecord) => void
+  history: RoundRecord[]
   onScoreboard: () => void
 }
 
-export function HostRoom({ onRecord, onScoreboard }: Props) {
+export function HostRoom({ onRecord, onScoreboard, history }: Props) {
   const clientId = getClientId()
   const [initialMode, setInitialMode] = useState<OnlineMode>('clasico')
 
@@ -166,6 +167,8 @@ export function HostRoom({ onRecord, onScoreboard }: Props) {
                 ))}
               </div>
             </div>
+
+            <LobbyPodium history={history} />
 
             <div className="mt-auto flex flex-wrap gap-3">
               <Button className="flex-1 py-4 text-base" disabled={!enough} onClick={() => send({ t: 'host:start' })}>
@@ -306,5 +309,57 @@ function JoinCard({ code }: { code: string }) {
         </p>
       )}
     </section>
+  )
+}
+
+const PODIUM_TIERS = ['oro', 'plata', 'bronce'] as const
+
+/** Podio del stand en la sala de espera: invita a los que pasan a superar al líder. */
+function LobbyPodium({ history }: { history: RoundRecord[] }) {
+  const top = standings(history).slice(0, 3)
+
+  if (top.length === 0) {
+    return (
+      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-ink-700 pt-5">
+        <div>
+          <h2 className="text-xl font-bold">Ranking del stand</h2>
+          <p className="text-ink-300">Todavía nadie juega. El primer gerente en entrar se lleva el liderato.</p>
+        </div>
+        <TierIcon tier="oro" className="size-10" />
+      </div>
+    )
+  }
+
+  return (
+    <div className="border-t border-ink-700 pt-5">
+      <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
+        <h2 className="text-xl font-bold">Ranking del stand</h2>
+        <p className="text-ink-300">
+          ¿Puedes superar a <b className="text-hazard">{top[0].name}</b>?
+        </p>
+      </div>
+      <ol className="grid gap-3 xl:grid-cols-3">
+        {top.map((p, i) => (
+          <li
+            key={p.key}
+            className={`flex items-center gap-3 rounded-xl border px-4 py-3 ${
+              i === 0 ? 'border-hazard/60 bg-hazard/10' : 'border-ink-700'
+            }`}
+          >
+            <TierIcon tier={PODIUM_TIERS[i]} className="size-8" />
+            <div className="min-w-0 flex-1">
+              <div className="truncate text-lg font-bold">{p.name}</div>
+              <div className="text-sm text-ink-400">
+                {p.wins} {p.wins === 1 ? 'victoria' : 'victorias'}
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="tabular font-mono text-3xl font-bold text-hazard">{p.points}</div>
+              <div className="text-xs text-ink-400">pts</div>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </div>
   )
 }

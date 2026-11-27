@@ -30,6 +30,8 @@ const VARIANT_KEY = 'planta-iot-duelo/variante'
 interface Props {
   active: boolean
   onRecord: (r: RoundRecord) => void
+  /** Historial del marcador del stand, para mostrar el podio en la sala en línea */
+  history: RoundRecord[]
   onScoreboard: () => void
 }
 
@@ -38,7 +40,7 @@ function pickExpert(previous: Scenario): Scenario {
   return pool[Math.floor(Math.random() * pool.length)]
 }
 
-export default function DuelView({ active, onRecord, onScoreboard }: Props) {
+export default function DuelView({ active, onRecord, onScoreboard, history }: Props) {
   const [phase, setPhase] = useState<Phase>('setup')
   const [names, setNames] = useState<string[]>(['', ''])
   const [mode, setMode] = useState<Mode>('clasico')
@@ -185,7 +187,7 @@ export default function DuelView({ active, onRecord, onScoreboard }: Props) {
         </div>
       </div>
 
-      {variant === 'online' && <HostRoom onRecord={onRecord} onScoreboard={onScoreboard} />}
+      {variant === 'online' && <HostRoom onRecord={onRecord} onScoreboard={onScoreboard} history={history} />}
 
       {variant === 'local' && phase === 'setup' && (
         <div className="grid gap-5 lg:grid-cols-[1.3fr_1fr]">

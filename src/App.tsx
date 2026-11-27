@@ -66,7 +66,7 @@ export default function App() {
           <ModelView />
         </div>
         <div hidden={route !== 'duelo'}>
-          <DuelView active={route === 'duelo'} onRecord={store.add} onScoreboard={() => go('marcador')} />
+          <DuelView active={route === 'duelo'} onRecord={store.add} onScoreboard={() => go('marcador')} history={store.history} />
         </div>
         <div hidden={route !== 'marcador'}>
           <ScoreboardView
