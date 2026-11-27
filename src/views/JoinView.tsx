@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react'
+import { Logo } from '../components/Logo'
 import { Keypad, isValidEntry } from '../components/Keypad'
 import { FormulaG } from '../components/MathText'
 import { Button, PLAYER_COLORS } from '../components/ui'
@@ -315,7 +316,7 @@ function Shell({ children }: { children: ReactNode }) {
       <div className="mx-auto max-w-md px-5 pb-8 pt-8">
         {children}
         <footer className="mt-12 flex items-center justify-center gap-2 text-xs text-ink-400">
-          <span className="size-2 rounded-full bg-hazard" aria-hidden /> Planta IoT · Gerentes de Planta en Crisis
+          <Logo size={20} /> Planta IoT · Gerentes de Planta en Crisis
         </footer>
       </div>
     </div>

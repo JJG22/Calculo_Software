@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Logo } from './components/Logo'
 import { useHashRoute, useHistory, type Route } from './lib/hooks'
 import DuelView from './views/DuelView'
 import JoinView from './views/JoinView'
@@ -82,16 +83,6 @@ export default function App() {
         Miguel Caro · Jhon Jairo García · Diego Núñez
       </footer>
     </div>
-  )
-}
-
-function Logo() {
-  return (
-    <svg width="38" height="38" viewBox="0 0 32 32" aria-hidden>
-      <rect width="32" height="32" rx="7" fill="var(--color-hazard)" />
-      <path d="M6 9c4 0 5 14 10 14s6-8 10-8" stroke="var(--color-ink-950)" strokeWidth="3" fill="none" strokeLinecap="round" />
-      <circle cx="16" cy="23" r="2.6" fill="var(--color-ink-950)" />
-    </svg>
   )
 }
 
