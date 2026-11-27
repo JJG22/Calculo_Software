@@ -56,7 +56,6 @@ export type SoloTier = 'oro' | 'plata' | 'bronce' | 'ninguna'
 export interface SoloTierInfo {
   id: SoloTier
   label: string
-  emoji: string
   /** Distancia máxima al óptimo para obtenerla */
   maxError: number
   points: number
@@ -65,10 +64,10 @@ export interface SoloTierInfo {
 }
 
 export const SOLO_TIERS: SoloTierInfo[] = [
-  { id: 'oro', label: 'Medalla de oro', emoji: '🥇', maxError: BONUS_TOLERANCE, points: WIN_POINTS + BONUS_POINTS, passed: true },
-  { id: 'plata', label: 'Medalla de plata', emoji: '🥈', maxError: 1, points: WIN_POINTS, passed: true },
-  { id: 'bronce', label: 'Medalla de bronce', emoji: '🥉', maxError: 2, points: 1, passed: false },
-  { id: 'ninguna', label: 'Sin medalla', emoji: '🔧', maxError: Infinity, points: 0, passed: false },
+  { id: 'oro', label: 'Medalla de oro', maxError: BONUS_TOLERANCE, points: WIN_POINTS + BONUS_POINTS, passed: true },
+  { id: 'plata', label: 'Medalla de plata', maxError: 1, points: WIN_POINTS, passed: true },
+  { id: 'bronce', label: 'Medalla de bronce', maxError: 2, points: 1, passed: false },
+  { id: 'ninguna', label: 'Sin medalla', maxError: Infinity, points: 0, passed: false },
 ]
 
 export function soloTier(x: number, xOpt: number): SoloTierInfo {

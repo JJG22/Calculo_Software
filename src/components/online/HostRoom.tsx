@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { Icon } from '../Icon'
 import QRCode from 'qrcode'
 import { FormulaG } from '../MathText'
 import { RoundReveal } from '../RoundReveal'
@@ -171,8 +172,9 @@ export function HostRoom({ onRecord, onScoreboard }: Props) {
                 {!enough
                   ? 'Esperando gerentes…'
                   : room.players.length === 1
-                    ? 'Iniciar reto solo ▶'
-                    : 'Iniciar duelo ▶'}
+                    ? 'Iniciar reto solo'
+                    : 'Iniciar duelo'}
+                {enough && <Icon name="arrow-right" className="size-5" />}
               </Button>
               {room.players.length > 0 && (
                 <Button variant="ghost" onClick={() => send({ t: 'host:newPair' })}>
@@ -216,7 +218,9 @@ export function HostRoom({ onRecord, onScoreboard }: Props) {
                   </div>
                   <div className="mt-3 font-mono text-lg">
                     {p.submitted ? (
-                      <span className="animate-pop inline-block text-ok">✓ Decisión enviada</span>
+                      <span className="animate-pop inline-flex items-center gap-2 text-ok">
+                        <Icon name="check" className="size-5" /> Decisión enviada
+                      </span>
                     ) : p.connected ? (
                       <span className="text-ink-400">
                         pensando<span className="animate-blink">…</span>

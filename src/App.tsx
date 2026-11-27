@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Icon } from './components/Icon'
 import { Logo } from './components/Logo'
 import { useHashRoute, useHistory, type Route } from './lib/hooks'
 import DuelView from './views/DuelView'
@@ -103,10 +104,11 @@ function FullscreenButton() {
     <button
       type="button"
       onClick={toggle}
-      className="hidden cursor-pointer rounded-lg border border-ink-600 px-3 py-2 font-mono text-xs text-ink-300 hover:border-ink-400 hover:text-ink-100 sm:block"
+      className="hidden cursor-pointer rounded-lg border border-ink-600 px-3 py-2 font-mono text-xs text-ink-300 hover:border-ink-400 hover:text-ink-100 sm:inline-flex sm:items-center sm:gap-1.5"
       title="Pantalla completa para proyectar en el stand"
     >
-      {isFull ? '⤡ Salir' : '⤢ Pantalla completa'}
+      <Icon name={isFull ? 'minimize' : 'maximize'} className="size-4" />
+      {isFull ? 'Salir' : 'Pantalla completa'}
     </button>
   )
 }

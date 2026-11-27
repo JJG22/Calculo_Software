@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Icon, TierIcon } from '../components/Icon'
 import { Keypad, isValidEntry } from '../components/Keypad'
 import { FormulaG } from '../components/MathText'
 import { HostRoom } from '../components/online/HostRoom'
@@ -145,19 +146,20 @@ export default function DuelView({ active, onRecord, onScoreboard }: Props) {
           <div className="flex rounded-lg border border-ink-600 p-0.5" role="group" aria-label="Forma de jugar">
             {(
               [
-                ['local', '🖥 Un dispositivo'],
-                ['online', '📱 En línea (celulares)'],
+                ['local', 'Un dispositivo', 'monitor'],
+                ['online', 'En línea (celulares)', 'phone'],
               ] as const
-            ).map(([v, label]) => (
+            ).map(([v, label, icon]) => (
               <button
                 key={v}
                 type="button"
                 onClick={() => chooseVariant(v)}
                 aria-pressed={variant === v}
-                className={`cursor-pointer rounded-md px-3 py-1.5 text-xs font-semibold transition ${
+                className={`inline-flex cursor-pointer items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold transition ${
                   variant === v ? 'bg-hazard text-ink-950' : 'text-ink-300 hover:text-ink-100'
                 }`}
               >
+                <Icon name={icon} className="size-4" />
                 {label}
               </button>
             ))}
@@ -166,10 +168,10 @@ export default function DuelView({ active, onRecord, onScoreboard }: Props) {
           <button
             type="button"
             onClick={toggleMute}
-            className="cursor-pointer rounded-lg border border-ink-600 px-3 py-2 font-mono text-xs text-ink-300 hover:border-ink-400"
+            className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-ink-600 px-3 py-2 font-mono text-xs text-ink-300 hover:border-ink-400"
             aria-pressed={!muted}
           >
-            {muted ? '🔇 Sonido' : '🔊 Sonido'}
+            <Icon name={muted ? 'volume-off' : 'volume'} className="size-4" /> Sonido
           </button>
           {variant === 'local' && (phase === 'handoff' || phase === 'entry') && (
             <button
@@ -252,7 +254,7 @@ export default function DuelView({ active, onRecord, onScoreboard }: Props) {
               </div>
 
               <Button type="submit" disabled={!canStart} className="mt-4 w-full py-4 text-base">
-                Iniciar ronda ▶
+                Iniciar ronda <Icon name="arrow-right" className="size-5" />
               </Button>
             </form>
           </section>
@@ -273,8 +275,9 @@ export default function DuelView({ active, onRecord, onScoreboard }: Props) {
               <li>Gana quien conserve más presupuesto.</li>
             </ol>
             <p className="border-t border-ink-700 pt-4 text-sm">
-              <b className="text-ink-100">Reto solo (1 gerente):</b> sin rival, compites contra el óptimo. 🥇 a ±0.3 (+4) ·
-              🥈 a ±1 (+3) · 🥉 a ±2 (+1).
+              <b className="text-ink-100">Reto solo (1 gerente):</b> sin rival, compites contra el óptimo. <TierIcon tier="oro" className="inline size-4 align-[-0.2em]" /> oro a ±0.3 (+4) ·{' '}
+              <TierIcon tier="plata" className="inline size-4 align-[-0.2em]" /> plata a ±1 (+3) ·{' '}
+              <TierIcon tier="bronce" className="inline size-4 align-[-0.2em]" /> bronce a ±2 (+1).
             </p>
             <div className="grid grid-cols-2 gap-3 pt-2">
               <div className="rounded-xl border border-hazard/40 bg-hazard/5 p-3">
@@ -307,7 +310,7 @@ export default function DuelView({ active, onRecord, onScoreboard }: Props) {
                 <>Reto en solitario: tu rival es la derivada. ¿Qué tan cerca del óptimo puedes quedar?</>
               ) : (
                 <>
-                  Los demás gerentes: <b className="text-ink-100">¡miren hacia otro lado!</b> 👀
+                  Los demás gerentes: <b className="text-ink-100">¡miren hacia otro lado!</b>
                 </>
               )}
             </p>
@@ -427,7 +430,8 @@ function Progress({ players, done }: { players: string[]; done: number }) {
           }`}
         >
           <span className="size-2 rounded-full" style={{ background: PLAYER_COLORS[i % PLAYER_COLORS.length] }} />
-          {p} {i < done ? '✓ decidió' : i === done ? '· decidiendo' : '· en espera'}
+          {i < done && <Icon name="check" className="size-3.5" />}
+          {p} {i < done ? 'decidió' : i === done ? '· decidiendo' : '· en espera'}
         </span>
       ))}
     </div>
@@ -441,12 +445,12 @@ function RoundTimer({ startedAt }: { startedAt: number }) {
   const warn = remaining < 30_000
   return (
     <div
-      className={`tabular rounded-lg border px-3 py-2 font-mono text-sm font-semibold ${
+      className={`tabular inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 font-mono text-sm font-semibold ${
         over ? 'border-alarm bg-alarm/10 text-alarm' : warn ? 'border-hazard text-hazard' : 'border-ink-600 text-ink-200'
       }`}
       title="Tiempo del turno de esta pareja (4 minutos)"
     >
-      ⏱ {over ? 'Tiempo agotado' : mmss(remaining)}
+      <Icon name="timer" className="size-4" /> {over ? 'Tiempo agotado' : mmss(remaining)}
     </div>
   )
 }

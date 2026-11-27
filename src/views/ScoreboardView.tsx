@@ -1,4 +1,5 @@
 import { Button, PLAYER_COLORS, SectionTitle } from '../components/ui'
+import { Icon, TierIcon } from '../components/Icon'
 import { num, qty, usd } from '../lib/format'
 import { getScenario, toUSD } from '../lib/model'
 import { historyToCSV, standings, type RoundRecord } from '../lib/scoring'
@@ -10,7 +11,7 @@ interface Props {
   onDuel: () => void
 }
 
-const MEDALS = ['🥇', '🥈', '🥉']
+const MEDALS = ['oro', 'plata', 'bronce'] as const
 
 function downloadCSV(history: RoundRecord[]) {
   // BOM para que Excel reconozca tildes y ñ
@@ -33,11 +34,11 @@ export default function ScoreboardView({ history, removeLast, clear, onDuel }: P
     return (
       <div className="panel grid min-h-[420px] place-items-center p-10 text-center">
         <div>
-          <div className="text-6xl">🏭</div>
+          <Icon name="factory" className="mx-auto size-16 text-hazard" />
           <h1 className="mt-4 text-3xl font-bold">Aún no hay rondas jugadas</h1>
           <p className="mt-2 text-ink-300">El marcador se llena solo al terminar cada duelo y se guarda en este navegador.</p>
           <Button className="mt-6" onClick={onDuel}>
-            Ir al duelo ▶
+            Ir al duelo <Icon name="arrow-right" className="size-5" />
           </Button>
         </div>
       </div>
@@ -52,7 +53,7 @@ export default function ScoreboardView({ history, removeLast, clear, onDuel }: P
         </SectionTitle>
         <div className="mb-6 flex flex-wrap gap-2">
           <Button variant="ghost" onClick={() => downloadCSV(history)}>
-            ⬇ Exportar CSV
+            <Icon name="download" className="size-4" /> Exportar CSV
           </Button>
           <Button
             variant="ghost"
@@ -60,7 +61,7 @@ export default function ScoreboardView({ history, removeLast, clear, onDuel }: P
               if (window.confirm('¿Deshacer la última ronda? Se restarán sus puntos.')) removeLast()
             }}
           >
-            ↶ Deshacer última ronda
+            <Icon name="undo" className="size-4" /> Deshacer última ronda
           </Button>
           <Button
             variant="danger"
@@ -82,7 +83,7 @@ export default function ScoreboardView({ history, removeLast, clear, onDuel }: P
             style={{ animationDelay: `${i * 90}ms` }}
           >
             <div className="flex items-center justify-between">
-              <span className="text-4xl">{MEDALS[i]}</span>
+              <TierIcon tier={MEDALS[i]} className="size-10" />
               <span className="tabular font-mono text-4xl font-bold text-hazard">{p.points}</span>
             </div>
             <div className="mt-3 truncate text-2xl font-bold">{p.name}</div>
@@ -150,7 +151,7 @@ export default function ScoreboardView({ history, removeLast, clear, onDuel }: P
                       <span className="flex min-w-0 items-center gap-2">
                         <span className="size-2 shrink-0 rounded-full" style={{ background: PLAYER_COLORS[i % PLAYER_COLORS.length] }} />
                         <span className={`truncate ${p.winner ? 'font-bold text-ink-100' : 'text-ink-300'}`}>
-                          {p.winner && '🏆 '}
+                          {p.winner && <Icon name="trophy" className="mr-1 inline size-3.5 align-[-0.1em] text-hazard" />}
                           {p.name}
                         </span>
                       </span>

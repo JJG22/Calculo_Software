@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { Icon, TierIcon } from './Icon'
 import { Chart } from './Chart'
 import { Eq, Frac, FormulaG } from './MathText'
 import { Button, PLAYER_COLORS } from './ui'
@@ -60,7 +61,8 @@ export function RoundReveal({ record, scenario: s, onRematch, onNewPlayers, onSc
               Reto en solitario · {tier.passed ? 'reto superado' : 'reto no superado'}
             </div>
             <div className="mt-2 text-3xl font-bold sm:text-5xl">
-              {tier.emoji} {tier.label}
+              <TierIcon tier={tier.id} className="mr-3 inline size-10 align-[-0.12em] sm:size-12" />
+              {tier.label}
             </div>
             <div className="mt-2 text-ink-300">
               {soloPlayer.name} conserva <b className={soloPlayer.left < 0 ? 'text-alarm' : 'text-ok'}>{usd(soloPlayer.left)}</b>{' '}
@@ -73,7 +75,8 @@ export function RoundReveal({ record, scenario: s, onRematch, onNewPlayers, onSc
               {winners.length > 1 ? 'Empate técnico' : 'Gerente ganador'}
             </div>
             <div className="mt-2 text-3xl font-bold sm:text-5xl">
-              🏆 {winners.map((w) => w.name).join(' y ')}
+              <Icon name="trophy" className="mr-3 inline size-10 align-[-0.12em] text-hazard sm:size-12" />
+              {winners.map((w) => w.name).join(' y ')}
             </div>
             <div className="mt-2 text-ink-300">
               Conserva <b className="text-ok">{usd(winners[0].left)}</b> de {usd(s.budget)} con x = {qty(winners[0].x)}{' '}
@@ -152,7 +155,8 @@ export function RoundReveal({ record, scenario: s, onRematch, onNewPlayers, onSc
                 <div className="mt-4 animate-rise rounded-lg bg-ink-950/60 p-3 text-sm">
                   {broke && (
                     <div className="mb-1 font-mono text-xs font-bold uppercase tracking-widest text-alarm">
-                      ⚠ Quiebra: superaste el presupuesto
+                      <Icon name="alert" className="mr-1.5 inline size-4 align-[-0.15em]" />
+                      Quiebra: superaste el presupuesto
                     </div>
                   )}
                   <div className={`font-bold ${v.cls}`}>{v.title}</div>
@@ -160,7 +164,8 @@ export function RoundReveal({ record, scenario: s, onRematch, onNewPlayers, onSc
                   <div className="mt-2 flex flex-wrap gap-1.5 font-mono text-xs">
                     {solo && (
                       <span className="rounded bg-hazard/15 px-2 py-0.5 text-hazard">
-                        {tier.emoji} {tier.label} +{tier.points}
+                        <TierIcon tier={tier.id} className="mr-1 inline size-3.5 align-[-0.15em]" />
+                        {tier.label} +{tier.points}
                       </span>
                     )}
                     {!solo && pl.winner && (
@@ -233,7 +238,8 @@ export function RoundReveal({ record, scenario: s, onRematch, onNewPlayers, onSc
 
       <div className="flex flex-wrap justify-center gap-3">
         <Button onClick={onRematch} disabled={!done}>
-          {solo ? '↻ Intentar de nuevo' : '↻ Revancha (mismos gerentes)'}
+          <Icon name="rotate" className="size-4" />
+          {solo ? 'Intentar de nuevo' : 'Revancha (mismos gerentes)'}
         </Button>
         <Button variant="ghost" onClick={onNewPlayers} disabled={!done}>
           {solo ? 'Siguiente jugador' : 'Siguiente pareja'}
@@ -291,7 +297,10 @@ function SoloScore({
                 }`}
               >
                 <span>
-                  {t.emoji} {t.label}
+                  <span className="inline-flex items-center gap-2">
+                    <TierIcon tier={t.id} className="size-4" />
+                    {t.label}
+                  </span>
                 </span>
                 <span className="font-mono text-xs">
                   {Number.isFinite(t.maxError) ? `±${t.maxError}` : 'más lejos'} · +{t.points}

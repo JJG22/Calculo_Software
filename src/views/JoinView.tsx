@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react'
+import { Icon, TierIcon } from '../components/Icon'
 import { Logo } from '../components/Logo'
 import { Keypad, isValidEntry } from '../components/Keypad'
 import { FormulaG } from '../components/MathText'
@@ -146,7 +147,7 @@ export default function JoinView({ codeFromUrl }: { codeFromUrl: string }) {
           </label>
           {formError && <p className="rounded-lg bg-alarm/10 p-3 text-sm text-alarm">{formError}</p>}
           <Button type="submit" disabled={!canJoin} className="h-14 w-full text-base">
-            Entrar a la sala ▶
+            Entrar a la sala <Icon name="arrow-right" className="size-5" />
           </Button>
         </form>
       </Shell>
@@ -190,7 +191,7 @@ export default function JoinView({ codeFromUrl }: { codeFromUrl: string }) {
 
       {room.phase === 'lobby' && (
         <div className="py-6 text-center">
-          <div className="animate-pop text-6xl">✅</div>
+          <Icon name="circle-check" className="animate-pop mx-auto size-16 text-ok" />
           <h1 className="mt-4 text-3xl font-bold">¡Estás dentro!</h1>
           <p className="mt-2 text-ink-300">Mira la pantalla del stand. La ronda empieza cuando el equipo la inicie.</p>
           <ul className="mt-6 flex flex-wrap justify-center gap-2">
@@ -218,20 +219,26 @@ export default function JoinView({ codeFromUrl }: { codeFromUrl: string }) {
           <div className="mt-4">
             <Keypad value={value} setValue={setValue} onSubmit={submit} max={MAX_MAINTENANCES} active accent={color} />
           </div>
-          <p className="mt-3 text-center text-xs text-ink-500">De 0 a {MAX_MAINTENANCES}, hasta 2 decimales. Tapa tu pantalla 🤫</p>
+          <p className="mt-3 text-center text-xs text-ink-500">De 0 a {MAX_MAINTENANCES}, hasta 2 decimales. Tapa tu pantalla.</p>
         </div>
       )}
 
       {room.phase === 'deciding' && me.submitted && (
         <div className="py-10 text-center">
-          <div className="animate-pop text-6xl">📨</div>
+          <Icon name="send" className="animate-pop mx-auto size-16 text-sensor" />
           <h1 className="mt-4 text-3xl font-bold">Decisión enviada</h1>
           <p className="mt-2 text-ink-300">Mira la pantalla grande para ver el resultado.</p>
           <ul className="mt-6 space-y-2">
             {room.players.map((p) => (
               <li key={p.id} className="flex justify-between rounded-lg border border-ink-700 px-4 py-2 text-sm">
                 <span>{p.name}</span>
-                <span className={p.submitted ? 'text-ok' : 'text-ink-500'}>{p.submitted ? '✓ listo' : 'pensando…'}</span>
+                <span className={p.submitted ? 'text-ok' : 'text-ink-500'}>{p.submitted ? (
+                    <span className="inline-flex items-center gap-1">
+                      <Icon name="check" className="size-4" /> listo
+                    </span>
+                  ) : (
+                    'pensando…'
+                  )}</span>
               </li>
             ))}
           </ul>
@@ -263,7 +270,13 @@ function MyResult({
 
   return (
     <div className="animate-rise text-center">
-      <div className="text-6xl">{tier ? tier.emoji : mine.winner ? '🏆' : '📉'}</div>
+      <div className="flex justify-center">
+        {tier ? (
+          <TierIcon tier={tier.id} className="size-16" />
+        ) : (
+          <Icon name={mine.winner ? 'trophy' : 'trending-down'} className={`size-16 ${mine.winner ? 'text-hazard' : 'text-ink-400'}`} />
+        )}
+      </div>
       <h1 className="mt-3 text-4xl font-bold" style={{ color: mine.winner ? 'var(--color-hazard)' : color }}>
         {tier ? tier.label : mine.winner ? '¡Ganaste!' : 'Esta vez no'}
       </h1>
